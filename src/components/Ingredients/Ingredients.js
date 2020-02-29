@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 import IngredientForm from './IngredientForm';
@@ -7,6 +7,37 @@ import Search from './Search';
 
 const Ingredients = () => {
 	const [userIngredients, setUserIngredients] = useState([]);
+
+	useEffect(() => {
+		axios
+			.get('https://react-hooks-practice-8d702.firebaseio.com/ingredients.json')
+			.then(responseData => {
+				const loadedIngredients = [];
+				// for (const key in res.data) {
+				// 	loadedIngredients.push({
+				// 		id: key,
+				// 		title: res.data.title,
+				// 		amount: res.data.amount
+				// 	});
+				// }
+				const data = responseData.data;
+				console.log(data);
+				for (const key in data) {
+					loadedIngredients.push({
+						id: key,
+						title: data[key].ingredient.title,
+						amount: data[key].ingredient.amount
+					});
+				}
+				// let data = res.data;
+				// console.log(res);
+
+				// let mapTest = data.map();
+				// console.log(mapTest);
+				setUserIngredients(loadedIngredients);
+				console.log(loadedIngredients);
+			});
+	}, []);
 
 	const addIngredientHandler = ingredient => {
 		axios
