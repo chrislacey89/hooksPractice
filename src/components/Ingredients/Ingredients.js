@@ -17,7 +17,6 @@ const Ingredients = () => {
 	}, []);
 
 	const addIngredientHandler = ingredient => {
-		console.log(ingredient);
 		axios
 			.post(
 				'https://react-hooks-practice-8d702.firebaseio.com/ingredients.json',
@@ -36,9 +35,16 @@ const Ingredients = () => {
 
 	const removeItemHandler = id => {
 		console.log('remove');
-		console.log(id);
-		const filteredArray = userIngredients.filter(item => item.id !== id);
-		setUserIngredients(filteredArray);
+
+		axios
+			.delete(
+				`https://react-hooks-practice-8d702.firebaseio.com/ingredients/${id}.json`
+			)
+			.then(res => {
+				const filteredArray = userIngredients.filter(item => item.id !== id);
+				setUserIngredients(filteredArray);
+			});
+
 		// const result = words.filter(word => word.length > 6);
 	};
 
