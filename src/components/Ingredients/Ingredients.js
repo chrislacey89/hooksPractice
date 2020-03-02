@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 import IngredientForm from './IngredientForm';
@@ -9,42 +9,21 @@ const Ingredients = () => {
 	const [userIngredients, setUserIngredients] = useState([]);
 
 	useEffect(() => {
-		axios
-			.get('https://react-hooks-practice-8d702.firebaseio.com/ingredients.json')
-			.then(responseData => {
-				const loadedIngredients = [];
-				// for (const key in res.data) {
-				// 	loadedIngredients.push({
-				// 		id: key,
-				// 		title: res.data.title,
-				// 		amount: res.data.amount
-				// 	});
-				// }
-				const data = responseData.data;
-				console.log(data);
-				for (const key in data) {
-					loadedIngredients.push({
-						id: key,
-						title: data[key].ingredient.title,
-						amount: data[key].ingredient.amount
-					});
-				}
-				// let data = res.data;
-				// console.log(res);
+		console.log('RENDERING INGREDIENTS', userIngredients);
+	}, [userIngredients]);
 
-				// let mapTest = data.map();
-				// console.log(mapTest);
-				setUserIngredients(loadedIngredients);
-				console.log(loadedIngredients);
-			});
+	const filteredIngredientsHandler = useCallback(filteredIngredients => {
+		setUserIngredients(filteredIngredients);
 	}, []);
 
 	const addIngredientHandler = ingredient => {
+		console.log(ingredient);
 		axios
 			.post(
 				'https://react-hooks-practice-8d702.firebaseio.com/ingredients.json',
 				{
-					ingredient
+					title: ingredient.title,
+					amount: ingredient.amount
 				}
 			)
 			.then(res =>
@@ -68,7 +47,7 @@ const Ingredients = () => {
 			<IngredientForm onAddIngredient={addIngredientHandler} />
 
 			<section>
-				<Search />
+				<Search onLoadIngredients={filteredIngredientsHandler} />
 				<IngredientList
 					ingredients={userIngredients}
 					onRemoveItem={removeItemHandler}
