@@ -7,6 +7,7 @@ import Search from './Search';
 
 const Ingredients = () => {
 	const [userIngredients, setUserIngredients] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		console.log('RENDERING INGREDIENTS', userIngredients);
@@ -17,6 +18,7 @@ const Ingredients = () => {
 	}, []);
 
 	const addIngredientHandler = ingredient => {
+		setIsLoading(true);
 		axios
 			.post(
 				'https://react-hooks-practice-8d702.firebaseio.com/ingredients.json',
@@ -25,23 +27,25 @@ const Ingredients = () => {
 					amount: ingredient.amount
 				}
 			)
-			.then(res =>
+			.then(res => {
+				setIsLoading(false);
 				setUserIngredients(prevIngredients => [
 					...prevIngredients,
 					{ id: res.data.name, ...ingredient }
-				])
-			);
+				]);
+			});
 	};
 
 	const removeItemHandler = id => {
-		console.log('remove');
-
+		setIsLoading(true);
 		axios
 			.delete(
 				`https://react-hooks-practice-8d702.firebaseio.com/ingredients/${id}.json`
 			)
 			.then(res => {
+				setIsLoading(false);
 				const filteredArray = userIngredients.filter(item => item.id !== id);
+
 				setUserIngredients(filteredArray);
 			});
 
@@ -50,7 +54,10 @@ const Ingredients = () => {
 
 	return (
 		<div className='App'>
-			<IngredientForm onAddIngredient={addIngredientHandler} />
+			<IngredientForm
+				onAddIngredient={addIngredientHandler}
+				loading={isLoading}
+			/>
 
 			<section>
 				<Search onLoadIngredients={filteredIngredientsHandler} />
