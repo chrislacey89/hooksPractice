@@ -3,11 +3,13 @@ import axios from 'axios';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
+import ErrorModal from '../UI/ErrorModal';
 import Search from './Search';
 
 const Ingredients = () => {
 	const [userIngredients, setUserIngredients] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState();
 
 	useEffect(() => {
 		console.log('RENDERING INGREDIENTS', userIngredients);
@@ -33,6 +35,10 @@ const Ingredients = () => {
 					...prevIngredients,
 					{ id: res.data.name, ...ingredient }
 				]);
+			})
+			.catch(error => {
+				setError('Something went wrong!');
+				setIsLoading(false);
 			});
 	};
 
@@ -47,13 +53,19 @@ const Ingredients = () => {
 				const filteredArray = userIngredients.filter(item => item.id !== id);
 
 				setUserIngredients(filteredArray);
+			})
+			.catch(error => {
+				setError('Something went wrong!');
+				setIsLoading(false);
 			});
-
-		// const result = words.filter(word => word.length > 6);
+	};
+	const clearError = () => {
+		setError(null);
 	};
 
 	return (
 		<div className='App'>
+			{error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
 			<IngredientForm
 				onAddIngredient={addIngredientHandler}
 				loading={isLoading}
