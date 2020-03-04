@@ -19,11 +19,30 @@ const ingredientReducer = (currentIngredients, action) => {
 	}
 };
 
+const httpReducer = (curHttpState, action) => {
+	switch (action.type) {
+		case 'SEND':
+			return { loading: true, error: null };
+		case 'RESPONSE':
+			return { ...curHttpState, loading: false };
+		case 'ERROR':
+			return { loading: false, error: action.errorMessage };
+		case 'CLEAR':
+			return { ...curHttpState, error: null };
+		default:
+			throw new Error('Should not be reached!');
+	}
+};
+
 const Ingredients = () => {
 	const [userIngredients, dispatch] = useReducer(ingredientReducer, []);
+	const [httpState, dispatchHttp] = useReducer(httpReducer, {
+		loading: false,
+		error: null
+	});
 	// const [userIngredients, setUserIngredients] = useState([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState();
+	// const [isLoading, setIsLoading] = useState(false);
+	// const [error, setError] = useState();
 
 	useEffect(() => {
 		console.log('RENDERING INGREDIENTS', userIngredients);
@@ -35,7 +54,8 @@ const Ingredients = () => {
 	}, []);
 
 	const addIngredientHandler = ingredient => {
-		setIsLoading(true);
+		// setIsLoading(true);
+		dispatchHttp({ type: 'SEND' });
 		axios
 			.post(
 				'https://react-hooks-practice-8d702.firebaseio.com/ingredients.json',
@@ -45,7 +65,9 @@ const Ingredients = () => {
 				}
 			)
 			.then(res => {
-				setIsLoading(false);
+				// setIsLoading(false);
+				dispatchHttp({ type: 'RESPONSE' });
+
 				// setUserIngredients(prevIngredients => [
 				// 	...prevIngredients,
 				// 	{ id: res.data.name, ...ingredient }
@@ -56,39 +78,46 @@ const Ingredients = () => {
 				});
 			})
 			.catch(error => {
-				setError('Something went wrong!');
-				setIsLoading(false);
+				// setError('Something went wrong!');
+				// setIsLoading(false);
+				dispatchHttp({ type: 'ERROR', errorMessage: 'Something went wrong' });
 			});
 	};
 
 	const removeItemHandler = id => {
-		setIsLoading(true);
+		// setIsLoading(true);
+		dispatchHttp({ type: 'SEND' });
+
 		axios
 			.delete(
-				`https://react-hooks-practice-8d702.firebaseio.com/ingredients/${id}.json`
+				`https://react-hooks-practice-8d702.firebaseio.com/ingredients/${id}.jon`
 			)
 			.then(res => {
-				setIsLoading(false);
-				const filteredArray = userIngredients.filter(item => item.id !== id);
+				// setIsLoading(false);
+				dispatchHttp({ type: 'RESPONSE' });
 
+				// const filteredArray = userIngredients.filter(item => item.id !== id);
 				// setUserIngredients(filteredArray);
 				dispatch({ type: 'DELETE', id: id });
 			})
 			.catch(error => {
-				setError('Something went wrong!');
-				setIsLoading(false);
+				// setError('Something went wrong!');
+				// setIsLoading(false);
+				dispatchHttp({ type: 'ERROR', errorMessage: 'Something went wrong' });
 			});
 	};
 	const clearError = () => {
-		setError(null);
+		dispatchHttp({ type: 'CLEAR' });
 	};
 
 	return (
 		<div className='App'>
-			{error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
+			{httpState.error && (
+				<ErrorModal onClose={clearError}>{httpState.error}</ErrorModal>
+			)}
 			<IngredientForm
 				onAddIngredient={addIngredientHandler}
-				loading={isLoading}
+				loading={httpState.loading}
 			/>
 
 			<section>
